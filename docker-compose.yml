@@ -1,0 +1,53 @@
+# Split deployment: four services behind Nginx, with MongoDB, RabbitMQ and Redis.
+#   docker compose up --build   ->  http://localhost:8080
+x-service: &service
+  build: .
+  restart: unless-stopped
+  environment: &env
+    PORT: "4000"
+    JWT_SECRET: ${JWT_SECRET:-change-me}
+    MONGO_URL: mongodb://mongo:27017
+    AMQP_URL: amqp://rabbitmq
+    REDIS_URL: redis://redis:6379
+  depends_on: [mongo, rabbitmq, redis]
+
+services:
+  auth:
+    <<: *service
+    environment: { <<: *env, SERVICE: auth }
+  chat:
+    <<: *service
+    environment: { <<: *env, SERVICE: chat }
+  notification:
+    <<: *service
+    environment: { <<: *env, SERVICE: notification }
+  ws:
+    <<: *service
+    environment: { <<: *env, SERVICE: ws }
+    deploy:
+      replicas: 2 # Redis adapter keeps rooms/presence consistent across instances
+
+  web:
+    build: .
+    command: ["sh", "-c", "mkdir -p /srv && cp -r client/dist/. /srv/ && sleep infinity"]
+    volumes: [static:/srv]
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["8080:80"]
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static:/usr/share/nginx/html:ro
+    depends_on: [auth, chat, notification, ws, web]
+
+  mongo:
+    image: mongo:7
+    volumes: [mongo:/data/db]
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports: ["15672:15672"]
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  mongo:
+  static:

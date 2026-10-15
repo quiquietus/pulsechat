@@ -1,0 +1,33 @@
+{
+  "name": "pulsechat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time chat: React + Node.js microservices (auth, chat, websocket, notifications) with MongoDB, RabbitMQ, Redis and Socket.IO",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm --prefix client install --include=dev && npm --prefix client run build",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "start:auth": "node services/auth/main.js",
+    "start:chat": "node services/chat/main.js",
+    "start:ws": "node services/ws/main.js",
+    "start:notification": "node services/notification/main.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "amqplib": "^0.10.4",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.10.0",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}

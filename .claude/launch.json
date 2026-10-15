@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "pulsechat", "runtimeExecutable": "node", "runtimeArgs": ["server.js"], "port": 4000 }
+  ]
+}
